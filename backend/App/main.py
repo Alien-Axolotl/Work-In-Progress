@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from Routes import api_router
 
-app = FastAPI(title = "PtilopsisRecruitPlanner")
+app = FastAPI(title="PtilopsisRecruitPlanner")
 
 app.add_middleware(
     CORSMiddleware,
@@ -10,3 +11,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(api_router)
