@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react'
-import { API_BASE } from "./api";
+import { API_BASE } from "../api";
  
-import './index.css'
+import '../static/index.css'
 
 function App() {
 
   const [health, setHealth] = useState('Unknown');
+  const [working, setWorking] = useState(false);
+
+  const toggleModule = async () => {
+    if (working) {
+      await window.electronAPI?.stopModule();
+    } else {
+      await window.electronAPI?.startModule();
+    }
+    setWorking(!working);
+  };
 
   const handleHealthCheck = async () => {
     try {
@@ -45,6 +55,11 @@ function App() {
       }`}>
         {health === 'Good' ? 'Module Online, Doctor!' : 'Module Is Offline, Activating Sleep Mode :<'}
       </div>
+
+      <div className={`flex items-center justify-center h-32 w-96 px-4 text-2xl font-extrabold rounded-sm transition-all duration-300`}>
+        <button onClick={toggleModule}>{working ? 'Module Working!' : 'Start Calibration'}</button>
+      </div>
+
     </div>
   )
 }

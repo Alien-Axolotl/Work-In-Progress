@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Routes import api_router
+from App.Routes import api_router
 
 app = FastAPI(title="PtilopsisRecruitPlanner")
 

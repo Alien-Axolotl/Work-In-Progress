@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run dev --prefix ../frontend\" \"wait-on http://localhost:5173 && electron .\""
+    "start": "concurrently \"npm run dev --prefix ../frontend\" \"..\\venv\\Scripts\\uvicorn.exe App.main:app --reload --reload-dir ../backend --app-dir ../backend\" \"wait-on http://localhost:5173 http-get://localhost:8000/health && electron .\""
   },
   "keywords": [],
   "author": "",
