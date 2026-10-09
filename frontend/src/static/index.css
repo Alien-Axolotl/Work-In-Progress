@@ -7,9 +7,3 @@
     overflow : hidden;
   }
 }
-
-::-webkit-scrollbar {
-    -moz-appearance: none;
-    appearance: none;
-}
-

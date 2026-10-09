@@ -10,9 +10,12 @@ import easyocr
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(os.path.dirname(SCRIPT_DIR), "Data")
 
+#Finds the JSON file that contains the list of tags
 TAG_LIST_PATH = os.path.join(DATA_DIR, "tag_list.json")
+
+#Finds the image that has the "Job Tags" template
 TEMPLATE_PATH = os.path.join(SCRIPT_DIR, "JobTagsTemplate.png")
-TEST_IMAGE_PATH = os.path.join(SCRIPT_DIR, "test", "testimage2.jpg")
+
 
 
 
@@ -45,8 +48,6 @@ if TEMPLATE is None:
     raise FileNotFoundError(f"Template not found: {TEMPLATE_PATH}")
 
 reader = easyocr.Reader(["en"], gpu=True)
-
-
 
 
 def best_template_match(gray, scales):
@@ -187,8 +188,6 @@ def find_boxes(image):
     return reading_order(boxes)
 
 
-
-
 def crop_box(image, box, margin_ratio=0.12):
     x, y, width, height = map(int, box)
     margin = int(height * margin_ratio)
@@ -198,16 +197,15 @@ def crop_box(image, box, margin_ratio=0.12):
 def is_empty(region):
     return cv2.cvtColor(region, cv2.COLOR_BGR2GRAY).std() < EMPTY_BOX_CONTRAST
 
-
+#is yellow and has top are used to determine if the tag is a senior operator or top operator. If it is yellow and has top, it is a top operator. If it is yellow and does not have top, it is a senior operator. If it is not yellow, it will be matched to the tag list.
 def is_yellow(region):
     hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, YELLOW_LOWER, YELLOW_UPPER)
     return mask.mean() / 255 >= YELLOW_MIN_RATIO
 
-
-def has_senior(text):
+def has_top(text):
     words = text.lower().split()
-    return bool(difflib.get_close_matches("senior", words, n=1, cutoff=FUZZY_CUTOFF))
+    return bool(difflib.get_close_matches("top", words, n=1, cutoff=FUZZY_CUTOFF))
 
 
 def match_tag(text):
@@ -224,20 +222,22 @@ def read_text(region):
     results.sort(key=lambda r: r[0][0][0])            
     return " ".join(text for _, text, _ in results)
 
-
 def read_box(image, box):
     region = crop_box(image, box)
     if region.size == 0 or is_empty(region):
         return None
 
     text = read_text(region)
-
-    if has_senior(text):
-        return "Senior Operator"
+    
     if is_yellow(region):
-        return "Top Operator"
+        if has_top(text):
+            return "top-operator"
+        return "senior-operator"
+    
+    
     return match_tag(text)
 
+#extracts tags and returns them in a list
 def extract_tags(image):
     if isinstance(image, str):
         image = cv2.imread(image)
@@ -252,7 +252,3 @@ def extract_tags(image):
         if tag and tag not in tags:
             tags.append(tag)
     return tags
-
-
-if __name__ == "__main__":
-    print(extract_tags(TEST_IMAGE_PATH))
